@@ -1,0 +1,31 @@
+training:
+  logging_level: 20
+  epochs: 100
+  batch_size: 128
+  no_cuda: False
+  seed: 42
+dataset:
+  data_dir: '/mnt/ialabnas/homes/vgaraujo/TPRBERT/tasks_1-20_v1-2/en-10k'
+  task_id: 1
+model:
+  read_before_write: True
+  embedding_size: 80
+  memory_size: 100
+  gamma_pos: 0.01
+  gamma_neg: 0.01
+  w_assoc_max: 1.0
+  init_limit: 0.1
+  use_bias: False
+  hops: 3
+optimization:
+  learning_rate: 0.003
+  max_grad_norm: 20.0
+  warm_up: True
+  warm_up_steps: 1
+  warm_up_factor: 0.1
+  decay: True
+  decay_thr: 0.1
+  decay_factor: 0.5
+comet:
+  api_key: '6oPfzhw55BucwZ4m8rV62ppyw'
+  project_name: 'h-mem'
