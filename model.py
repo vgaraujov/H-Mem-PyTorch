@@ -15,6 +15,7 @@ class HMemQA(nn.Module):
         self.extract = ExtractionModule(config)
         self.write = WritingCell(config)
         self.read = ReadingCell(config)
+        self.output = OutputModule(config)
 
     def init_hidden(self, batch_size, device = None):
         if device: return torch.zeros(batch_size, self.memory_size).to(device)
@@ -42,8 +43,10 @@ class HMemQA(nn.Module):
         v_r = self.init_hidden(batch_size, device)
         for i in range(self.hops):
             v_r = self.read(query_emb, m, v_r)
-
-        return v_r
+        
+        logits = self.output(v_r)
+        
+        return logits
 
 class InputModule(nn.Module):
     def __init__(self, config: Dict[str, Any]):
