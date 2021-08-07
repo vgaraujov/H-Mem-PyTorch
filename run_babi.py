@@ -86,7 +86,8 @@ set_seed(config.training.seed, use_cuda)
 model = HMemQA(config.model).to(device)
 
 optimizer = optim.Adam(model.parameters(),
-                       lr=config.optimization.learning_rate)
+                       lr=config.optimization.learning_rate,
+                       weight_decay=1e-3)
 
 loss_fn = nn.CrossEntropyLoss(reduction='none')
 warm_up = config.optimization.get("warm_up", False)
