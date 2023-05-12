@@ -30,9 +30,9 @@ class HMemQA(nn.Module):
         device = story.device
 
         story_emb, query_emb = self.encode(story, query)
-        story_emb = self.bn_story(story_emb.permute(0,2,1))
+        story_emb = self.bn_story(story_emb.permute(0,2,1)) # removing this normalization leads to better performance
         story_emb = story_emb.permute(0,2,1)
-        query_emb = self.bn_query(query_emb)
+        query_emb = self.bn_query(query_emb) # removing this normalization leads to better performance
 
         k, v = self.extract(story_emb)
 
