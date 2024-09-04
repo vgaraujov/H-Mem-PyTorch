@@ -8,7 +8,6 @@ import numpy as np
 
 PAD_TOKEN = '_PAD'
 PAD_ID = 0
-SPLIT_RE = re.compile('(\W+)?')
 
 def load_task(data_dir, task_id, only_supporting=False):
     """
@@ -26,9 +25,13 @@ def load_task(data_dir, task_id, only_supporting=False):
     test_data = get_stories(test_file, only_supporting)
     return train_data, test_data
 
-def tokenize(sentence):
-    "Tokenize a string by splitting on non-word characters and stripping whitespace."
-    return [token.strip().lower() for token in re.split(SPLIT_RE, sentence) if token.strip()]
+def tokenize(sent):
+    '''Return the tokens of a sentence including punctuation.
+    >>> tokenize('Bob dropped the apple. Where is the apple?')
+    ['Bob', 'dropped', 'the', 'apple', '.', 'Where', 'is', 'the', 'apple', '?']
+    '''
+    # Use a regular expression that matches non-word characters as separators
+    return [x.strip().lower() for x in re.split(r'(\W)', sent) if x.strip()]
 
 def parse_stories(lines, only_supporting=False):
     """
