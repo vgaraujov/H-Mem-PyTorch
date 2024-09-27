@@ -8,7 +8,11 @@ I followed the [original implementation](https://github.com/IGITUGraz/H-Mem) and
 
 ## Usage
 
-Run the following command
+[bAbI dataset](http://fb.ai/babi) should be downloaded first:
+
+``wget -qO- http://www.thespermwhale.com/jaseweston/babi/tasks_1-20_v1-2.tar.gz | tar xvz -C .``
+
+Then, run the following command:
 
 ``python run_babi.py --data_dir=tasks_1-20_v1-2/en-10k --task_id=1 ``
 

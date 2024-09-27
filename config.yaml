@@ -5,7 +5,7 @@ training:
   no_cuda: False
   seed: 42
 dataset:
-  data_dir: '/mnt/ialabnas/homes/vgaraujo/TPRBERT/tasks_1-20_v1-2/en-10k'
+  data_dir: 'tasks_1-20_v1-2/en-10k/'
   task_id: 1
 model:
   read_before_write: True
@@ -27,5 +27,5 @@ optimization:
   decay_thr: 0.1
   decay_factor: 0.5
 comet:
-  api_key: '6oPfzhw55BucwZ4m8rV62ppyw'
+  api_key: 'placeholder'
   project_name: 'h-mem'
