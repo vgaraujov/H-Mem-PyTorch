@@ -1,0 +1,29 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "hostRequirements": {
+    "gpu": "optional"
+  },
+  "runArgs": [
+    "--gpus=all",
+    "--privileged"
+  ],
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/nvidia-cuda:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "${containerWorkspaceFolder}/.devcontainer/sailplane-latest.vsix"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}
