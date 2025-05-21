@@ -24,18 +24,38 @@ from dataset import bAbIDataset
 logger = logging.getLogger(__name__)
 
 class WarmupScheduler(_LRScheduler):
-    def __init__(self, optimizer: optim.Optimizer, multiplier: float, steps: int):
+    def __init__(self, optimizer: optim.Optimizer, multiplier: float, steps: int, decay_factor: float = 1.0, decay_after_steps: bool = True):
         self.multiplier = multiplier
         self.steps = steps
+        self.decay_factor = decay_factor
+        self.decay_after_steps = decay_after_steps
+        # It's important that initial_base_lrs is a copy of the original base_lrs
+        # before _LRScheduler.__init__ might alter them or before they are used.
+        # However, _LRScheduler stores the original LRs from optimizer.param_groups in self.base_lrs.
+        # So, we capture them *after* super().__init__() to ensure they are correctly initialized.
         super(WarmupScheduler, self).__init__(optimizer=optimizer)
+        # Capture the base LRs that _LRScheduler has set. These are the true "initial" LRs.
+        self.initial_base_lrs = list(self.base_lrs)
 
     def get_lr(self):
         if self.last_epoch < self.steps:
-            return [base_lr * self.multiplier for base_lr in self.base_lrs]
-        return self.base_lrs
+            # Warmup phase: multiply the original base LRs by the multiplier
+            return [initial_lr * self.multiplier for initial_lr in self.initial_base_lrs]
+        
+        # After warmup phase
+        if self.decay_after_steps and self.decay_factor < 1.0:
+            # Calculate number of decay steps that have occurred after warmup
+            decay_steps = self.last_epoch - self.steps + 1
+            decay_multiplier = self.decay_factor ** decay_steps
+            # Apply decay to the original base LRs
+            return [initial_lr * decay_multiplier for initial_lr in self.initial_base_lrs]
+        
+        # No decay after warmup, or decay_factor is 1.0 (no decay)
+        # Return the original base LRs (or what they were set to post-warmup if multiplier was intended to be permanent)
+        # Given the logic, it seems the multiplier is only for warmup. So return initial_base_lrs.
+        return list(self.initial_base_lrs)
 
-    def decay_lr(self, decay_factor: float):
-        self.base_lrs = [decay_factor * base_lr for base_lr in self.base_lrs]
+    # decay_lr method is removed
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--task_id', type=int, default=1)
@@ -94,9 +114,10 @@ warm_up = config.optimization.get("warm_up", False)
 
 scheduler = WarmupScheduler(optimizer=optimizer,
                             steps=config.optimization.warm_up_steps if warm_up else 0,
-                            multiplier=config.optimization.warm_up_factor if warm_up else 1)
+                            multiplier=config.optimization.warm_up_factor if warm_up else 1,
+                            decay_factor=config.optimization.get("decay_factor", 1.0),
+                            decay_after_steps=config.optimization.get("decay", False))
 
-decay_done = False
 for i in range(config.training.epochs):
     logging.info(f"##### EPOCH: {i} #####")
     # Train
@@ -149,8 +170,5 @@ for i in range(config.training.epochs):
     logging.info(f"\nTrain accuracy: {train_acc:.3f}, loss: {train_loss:.3f}"
                  f"\nValid accuracy: {valid_acc:.3f}, loss: {valid_loss:.3f}"
                  f"\nLR: {optimizer.param_groups[0]['lr']:.3f}")
-    if config.optimization.get("decay", False) and valid_loss < config.optimization.decay_thr and not decay_done:
-        scheduler.decay_lr(config.optimization.decay_factor)
-        decay_done = True
         
     scheduler.step()
