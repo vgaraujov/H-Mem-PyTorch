@@ -8,7 +8,8 @@ import numpy as np
 
 PAD_TOKEN = '_PAD'
 PAD_ID = 0
-SPLIT_RE = re.compile('(\W+)?')
+# split on any non-word characters while keeping punctuation
+SPLIT_RE = re.compile(r'(\W+)')
 
 def load_task(data_dir, task_id, only_supporting=False):
     """
